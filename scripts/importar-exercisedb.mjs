@@ -1,18 +1,31 @@
 // Uso: node scripts/importar-exercisedb.mjs
 // Percorre o endpoint gratuito da ExerciseDB V1, filtra os exercícios principais
 // (scripts/exercicios-principais.json) e gera src/catalogo-exercisedb.json.
-// Rode uma única vez. Depois o app lê o JSON gerado e não chama a API.
+// Para assim que encontrar todos, ou ao detectar paginação travada.
+// O arquivo é salvo a cada página, então Ctrl+C não perde o progresso.
 import { readFileSync, writeFileSync } from 'node:fs'
 
 const BASE = 'https://oss.exercisedb.dev/api/v1/exercises'
-const PAUSA_MS = 600 // pausa entre páginas para não sobrecarregar a API
+const PAUSA_MS = 600
 const MAX_TENTATIVAS = 8
+const SAIDA = new URL('../src/catalogo-exercisedb.json', import.meta.url)
 
-const principais = new Set(
-  JSON.parse(readFileSync(new URL('./exercicios-principais.json', import.meta.url), 'utf8')).map((n) =>
-    n.toLowerCase().trim(),
-  ),
-)
+const nomesPrincipais = JSON.parse(
+  readFileSync(new URL('./exercicios-principais.json', import.meta.url), 'utf8'),
+).map((n) => n.toLowerCase().trim())
+const principais = new Set(nomesPrincipais)
+
+const encontrados = new Map()
+let cursor = null
+let pagina = 0
+let limitePaginas = Infinity
+const cursoresVistos = new Set()
+
+function salvar() {
+  const lista = [...encontrados.values()]
+  writeFileSync(SAIDA, JSON.stringify(lista, null, 2))
+  return lista
+}
 
 // Tenta de novo quando a API responde 429 (limite de requisições), esperando mais a cada vez.
 async function buscarComEspera(url) {
@@ -29,15 +42,18 @@ async function buscarComEspera(url) {
   throw new Error(`Página ${pagina + 1} continua com erro após ${MAX_TENTATIVAS} tentativas.`)
 }
 
-const encontrados = new Map()
-let cursor = null
-let pagina = 0
+let motivo = 'todas as páginas lidas'
 
-do {
+while (true) {
   const url = cursor ? `${BASE}?cursor=${encodeURIComponent(cursor)}` : BASE
   const res = await buscarComEspera(url)
   const json = await res.json()
   pagina++
+
+  if (pagina === 1 && json.meta?.total) {
+    // Margem de 2 páginas sobre o total declarado, para não rodar para sempre
+    limitePaginas = Math.ceil(json.meta.total / (json.data?.length || 10)) + 2
+  }
 
   for (const ex of json.data ?? []) {
     const nome = String(ex.name).toLowerCase().trim()
@@ -54,14 +70,21 @@ do {
       })
     }
   }
+  salvar()
+  console.log(`Página ${pagina}: ${encontrados.size}/${principais.size} exercícios principais encontrados.`)
 
-  cursor = json.meta?.hasNextPage ? json.meta.nextCursor : null
-  if (cursor) await new Promise((r) => setTimeout(r, PAUSA_MS))
-} while (cursor)
+  if (encontrados.size === principais.size) { motivo = 'todos os exercícios principais encontrados'; break }
+  if (!json.meta?.hasNextPage || !json.meta?.nextCursor) break
+  if (!json.data?.length) { motivo = 'página vazia'; break }
+  if (cursoresVistos.has(json.meta.nextCursor)) { motivo = 'cursor repetido (paginação travada)'; break }
+  if (pagina >= limitePaginas) { motivo = 'limite de páginas do total declarado'; break }
 
-const saida = [...encontrados.values()]
-const faltando = [...principais].filter((n) => !encontrados.has(n))
+  cursoresVistos.add(json.meta.nextCursor)
+  cursor = json.meta.nextCursor
+  await new Promise((r) => setTimeout(r, PAUSA_MS))
+}
 
-writeFileSync(new URL('../src/catalogo-exercisedb.json', import.meta.url), JSON.stringify(saida, null, 2))
-console.log(`Páginas lidas: ${pagina}. Exercícios salvos: ${saida.length}.`)
+const lista = salvar()
+const faltando = nomesPrincipais.filter((n) => !encontrados.has(n))
+console.log(`Parou: ${motivo}. Páginas lidas: ${pagina}. Exercícios salvos: ${lista.length}.`)
 if (faltando.length) console.log(`Não encontrados pelo nome exato: ${faltando.join(', ')}`)
