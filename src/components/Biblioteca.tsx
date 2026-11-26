@@ -6,7 +6,7 @@ interface Props {
   exercicios: Exercicio[]
 }
 
-const vazio = { nome: '', grupoMuscular: '', equipamento: '', explicacao: '', gifUrl: '' }
+const vazio = { nome: '', grupoMuscular: '', equipamento: '', explicacao: '', gifUrl: '', videoUrl: '' }
 
 export function Biblioteca({ exercicios }: Props) {
   const [busca, setBusca] = useState('')
@@ -27,6 +27,7 @@ export function Biblioteca({ exercicios }: Props) {
       explicacao: form.explicacao.trim(),
       passos: [],
       gifUrl: form.gifUrl.trim() || undefined,
+      videoUrl: form.videoUrl.trim() || undefined,
       origem: 'usuario',
     })
     setForm(vazio)
@@ -68,6 +69,7 @@ export function Biblioteca({ exercicios }: Props) {
         <input placeholder="Equipamento" value={form.equipamento} onChange={(e) => setForm({ ...form, equipamento: e.target.value })} />
         <textarea placeholder="Explicação curta" value={form.explicacao} onChange={(e) => setForm({ ...form, explicacao: e.target.value })} />
         <input placeholder="URL do GIF (opcional)" value={form.gifUrl} onChange={(e) => setForm({ ...form, gifUrl: e.target.value })} />
+        <input placeholder="Link do vídeo (opcional)" value={form.videoUrl} onChange={(e) => setForm({ ...form, videoUrl: e.target.value })} />
         <button type="submit">Salvar exercício</button>
       </form>
     </main>

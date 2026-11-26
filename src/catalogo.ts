@@ -1,118 +1,47 @@
 import type { Exercicio } from './types'
 
-/**
- * Catálogo inicial. Os campos de texto seguem o estilo do Free Exercise DB
- * (domínio público). O gifUrl fica vazio até você apontar para a fonte escolhida
- * (ExerciseDB ou WorkoutX) ou para um arquivo próprio.
- */
-export const CATALOGO_INICIAL: Exercicio[] = [
-  {
-    id: 'cat-supino-reto',
-    nome: 'Supino reto',
-    grupoMuscular: 'Peito',
-    equipamento: 'Barra',
-    explicacao: 'Empurre a barra para cima a partir do peito, mantendo os ombros para trás.',
-    passos: [
-      'Deite no banco com os pés firmes no chão.',
-      'Segure a barra um pouco mais larga que os ombros.',
-      'Desça a barra até encostar de leve no peito.',
-      'Empurre até estender os braços sem travar os cotovelos.',
-    ],
-    origem: 'catalogo',
-  },
-  {
-    id: 'cat-agachamento',
-    nome: 'Agachamento livre',
-    grupoMuscular: 'Pernas',
-    equipamento: 'Barra',
-    explicacao: 'Agache mantendo o tronco firme e os joelhos alinhados com os pés.',
-    passos: [
-      'Posicione a barra sobre os trapézios.',
-      'Afaste os pés na largura dos ombros.',
-      'Desça empurrando o quadril para trás até as coxas ficarem paralelas ao chão.',
-      'Suba empurrando o chão com os pés.',
-    ],
-    origem: 'catalogo',
-  },
-  {
-    id: 'cat-puxada-frente',
-    nome: 'Puxada frontal',
-    grupoMuscular: 'Costas',
-    equipamento: 'Polia',
-    explicacao: 'Puxe a barra em direção ao peito, levando os cotovelos para baixo.',
-    passos: [
-      'Sente com as coxas presas no apoio.',
-      'Segure a barra com pegada mais larga que os ombros.',
-      'Puxe a barra até o alto do peito.',
-      'Volte devagar até estender os braços.',
-    ],
-    origem: 'catalogo',
-  },
-  {
-    id: 'cat-desenvolvimento',
-    nome: 'Desenvolvimento com halteres',
-    grupoMuscular: 'Ombros',
-    equipamento: 'Halteres',
-    explicacao: 'Empurre os halteres acima da cabeça, sentado ou em pé.',
-    passos: [
-      'Segure um halter em cada mão na altura dos ombros.',
-      'Empurre os halteres para cima até quase estender os braços.',
-      'Desça controlando o movimento até a altura inicial.',
-    ],
-    origem: 'catalogo',
-  },
-  {
-    id: 'cat-rosca-direta',
-    nome: 'Rosca direta',
-    grupoMuscular: 'Bíceps',
-    equipamento: 'Barra',
-    explicacao: 'Flexione os cotovelos trazendo a barra em direção aos ombros.',
-    passos: [
-      'Fique em pé com a barra na altura das coxas, pegada supinada.',
-      'Flexione os cotovelos sem mexer os ombros.',
-      'Desça devagar até estender os braços.',
-    ],
-    origem: 'catalogo',
-  },
-  {
-    id: 'cat-triceps-corda',
-    nome: 'Tríceps na polia com corda',
-    grupoMuscular: 'Tríceps',
-    equipamento: 'Polia',
-    explicacao: 'Estenda os cotovelos empurrando a corda para baixo.',
-    passos: [
-      'Segure a corda com as duas mãos acima da cabeça ou na altura do peito.',
-      'Mantenha os cotovelos junto ao corpo.',
-      'Empurre a corda para baixo até estender os braços.',
-      'Volte devagar.',
-    ],
-    origem: 'catalogo',
-  },
-  {
-    id: 'cat-stiff',
-    nome: 'Stiff',
-    grupoMuscular: 'Posterior de coxa',
-    equipamento: 'Barra',
-    explicacao: 'Desça a barra rente às pernas empurrando o quadril para trás, com joelhos levemente flexionados.',
-    passos: [
-      'Segure a barra na frente das coxas.',
-      'Empurre o quadril para trás mantendo as costas retas.',
-      'Desça até sentir alongamento na parte de trás das coxas.',
-      'Suba apertando glúteos.',
-    ],
-    origem: 'catalogo',
-  },
-  {
-    id: 'cat-prancha',
-    nome: 'Prancha',
-    grupoMuscular: 'Abdômen',
-    equipamento: 'Peso corporal',
-    explicacao: 'Mantenha o corpo reto apoiado nos antebraços e pontas dos pés.',
-    passos: [
-      'Apoie os antebraços no chão, cotovelos sob os ombros.',
-      'Estique as pernas e mantenha o corpo em linha reta.',
-      'Contraia o abdômen e segure pelo tempo definido.',
-    ],
-    origem: 'catalogo',
-  },
+/** Busca no YouTube pelo nome do exercício, usada até você colar um link exato. */
+const busca = (nome: string) =>
+  `https://www.youtube.com/results?search_query=${encodeURIComponent(nome + ' execução correta')}`
+
+type Base = Omit<Exercicio, 'id' | 'origem' | 'passos' | 'videoUrl'> & { slug: string }
+
+const BASE: Base[] = [
+  { slug: 'supino-reto', nome: 'Supino reto', grupoMuscular: 'Peito', equipamento: 'Barra', explicacao: 'Empurre a barra para cima a partir do peito, com os ombros para trás.' },
+  { slug: 'supino-inclinado-halteres', nome: 'Supino inclinado com halteres', grupoMuscular: 'Peito', equipamento: 'Halteres', explicacao: 'Empurre os halteres para cima num banco inclinado, focando na parte superior do peito.' },
+  { slug: 'flexao', nome: 'Flexão de braço', grupoMuscular: 'Peito', equipamento: 'Peso corporal', explicacao: 'Desça o corpo em linha reta até quase encostar no chão e volte empurrando.' },
+  { slug: 'crucifixo-polia', nome: 'Crucifixo na polia', grupoMuscular: 'Peito', equipamento: 'Polia', explicacao: 'Feche os braços à frente do corpo com a polia, mantendo leve flexão nos cotovelos.' },
+  { slug: 'agachamento-livre', nome: 'Agachamento livre', grupoMuscular: 'Pernas', equipamento: 'Barra', explicacao: 'Agache mantendo o tronco firme e os joelhos alinhados com os pés.' },
+  { slug: 'leg-press', nome: 'Leg press', grupoMuscular: 'Pernas', equipamento: 'Máquina', explicacao: 'Empurre a plataforma com os pés, sem travar os joelhos no final.' },
+  { slug: 'cadeira-extensora', nome: 'Cadeira extensora', grupoMuscular: 'Quadríceps', equipamento: 'Máquina', explicacao: 'Estenda as pernas contra o apoio, contraindo o quadríceps no topo.' },
+  { slug: 'mesa-flexora', nome: 'Mesa flexora', grupoMuscular: 'Posterior de coxa', equipamento: 'Máquina', explicacao: 'Flexione os joelhos trazendo o apoio em direção aos glúteos.' },
+  { slug: 'stiff', nome: 'Stiff', grupoMuscular: 'Posterior de coxa', equipamento: 'Barra', explicacao: 'Desça a barra rente às pernas empurrando o quadril para trás, com as costas retas.' },
+  { slug: 'levantamento-terra', nome: 'Levantamento terra', grupoMuscular: 'Costas', equipamento: 'Barra', explicacao: 'Levante a barra do chão estendendo quadril e joelhos, mantendo a coluna neutra.' },
+  { slug: 'hip-thrust', nome: 'Hip thrust', grupoMuscular: 'Glúteos', equipamento: 'Barra', explicacao: 'Empurre o quadril para cima com as costas apoiadas num banco, apertando os glúteos no topo.' },
+  { slug: 'passada', nome: 'Passada', grupoMuscular: 'Pernas', equipamento: 'Peso corporal', explicacao: 'Dê um passo à frente e flexione os dois joelhos, voltando à posição inicial.' },
+  { slug: 'panturrilha-em-pe', nome: 'Panturrilha em pé', grupoMuscular: 'Panturrilha', equipamento: 'Máquina', explicacao: 'Suba na ponta dos pés e desça devagar até alongar a panturrilha.' },
+  { slug: 'puxada-frontal', nome: 'Puxada frontal', grupoMuscular: 'Costas', equipamento: 'Polia', explicacao: 'Puxe a barra em direção ao peito, levando os cotovelos para baixo.' },
+  { slug: 'barra-fixa', nome: 'Barra fixa', grupoMuscular: 'Costas', equipamento: 'Peso corporal', explicacao: 'Puxe o corpo para cima até o queixo passar da barra, e desça devagar.' },
+  { slug: 'remada-baixa', nome: 'Remada baixa', grupoMuscular: 'Costas', equipamento: 'Polia', explicacao: 'Puxe o cabo em direção ao abdômen, mantendo o tronco firme.' },
+  { slug: 'remada-unilateral', nome: 'Remada unilateral com halter', grupoMuscular: 'Costas', equipamento: 'Halteres', explicacao: 'Puxe o halter em direção ao quadril, apoiando a outra mão num banco.' },
+  { slug: 'face-pull', nome: 'Face pull', grupoMuscular: 'Ombros', equipamento: 'Polia', explicacao: 'Puxe a corda em direção ao rosto, com os cotovelos altos.' },
+  { slug: 'desenvolvimento-halteres', nome: 'Desenvolvimento com halteres', grupoMuscular: 'Ombros', equipamento: 'Halteres', explicacao: 'Empurre os halteres acima da cabeça, sentado ou em pé.' },
+  { slug: 'elevacao-lateral', nome: 'Elevação lateral', grupoMuscular: 'Ombros', equipamento: 'Halteres', explicacao: 'Eleve os braços para os lados até a altura dos ombros, com leve flexão nos cotovelos.' },
+  { slug: 'rosca-direta', nome: 'Rosca direta', grupoMuscular: 'Bíceps', equipamento: 'Barra', explicacao: 'Flexione os cotovelos trazendo a barra em direção aos ombros.' },
+  { slug: 'rosca-martelo', nome: 'Rosca martelo', grupoMuscular: 'Bíceps', equipamento: 'Halteres', explicacao: 'Flexione os cotovelos com as palmas voltadas uma para a outra.' },
+  { slug: 'triceps-polia-corda', nome: 'Tríceps na polia com corda', grupoMuscular: 'Tríceps', equipamento: 'Polia', explicacao: 'Estenda os cotovelos empurrando a corda para baixo, com os cotovelos junto ao corpo.' },
+  { slug: 'mergulho', nome: 'Mergulho', grupoMuscular: 'Tríceps', equipamento: 'Peso corporal', explicacao: 'Desça o corpo flexionando os cotovelos e volte empurrando.' },
+  { slug: 'prancha', nome: 'Prancha', grupoMuscular: 'Abdômen', equipamento: 'Peso corporal', explicacao: 'Mantenha o corpo reto apoiado nos antebraços e nas pontas dos pés.' },
+  { slug: 'abdominal-crunch', nome: 'Abdominal crunch', grupoMuscular: 'Abdômen', equipamento: 'Peso corporal', explicacao: 'Eleve os ombros do chão contraindo o abdômen, sem puxar o pescoço.' },
+  { slug: 'abdominal-polia', nome: 'Abdominal na polia', grupoMuscular: 'Abdômen', equipamento: 'Polia', explicacao: 'Flexione o tronco para baixo contra a polia, contraindo o abdômen.' },
+  { slug: 'elevacao-pernas-suspenso', nome: 'Elevação de pernas suspenso', grupoMuscular: 'Abdômen', equipamento: 'Peso corporal', explicacao: 'Pendurado na barra, eleve as pernas controlando o movimento.' },
 ]
+
+export const CATALOGO_INICIAL: Exercicio[] = BASE.map(({ slug, nome, ...resto }) => ({
+  id: `cat-${slug}`,
+  nome,
+  ...resto,
+  passos: [],
+  videoUrl: busca(nome),
+  origem: 'catalogo' as const,
+}))

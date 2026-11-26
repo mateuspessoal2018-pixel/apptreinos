@@ -148,3 +148,15 @@ h3 { margin: 12px 0 6px; font-size: 1rem; }
 }
 .explicacao { line-height: 1.5; }
 .passos { padding-left: 20px; line-height: 1.6; color: var(--suave); }
+
+.video { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+.video label { display: flex; flex-direction: column; gap: 4px; font-size: 0.8rem; color: var(--suave); }
+.botao-video {
+  display: inline-block;
+  text-align: center;
+  background: var(--acento);
+  color: #0f172a;
+  border-color: var(--acento);
+  font-weight: 600;
+  text-decoration: none;
+}

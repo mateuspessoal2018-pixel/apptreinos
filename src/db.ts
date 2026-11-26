@@ -19,10 +19,11 @@ export const db = new PlannerDB()
 
 /** Preenche a biblioteca com o catálogo base na primeira abertura. */
 export async function garantirCatalogo() {
-  const total = await db.exercicios.count()
-  if (total === 0) {
-    await db.exercicios.bulkAdd(CATALOGO_INICIAL)
-  }
+  // Atualiza o catálogo base sem apagar exercícios criados por você (origem 'usuario')
+  // e sem sobrescrever links de vídeo que você já colou.
+  const existentes = new Map((await db.exercicios.toArray()).map((e) => [e.id, e]))
+  const novos = CATALOGO_INICIAL.filter((e) => !existentes.has(e.id)).map((e) => e)
+  if (novos.length) await db.exercicios.bulkAdd(novos)
 }
 
 export function novoId(): string {

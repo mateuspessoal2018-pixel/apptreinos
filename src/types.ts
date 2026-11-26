@@ -17,6 +17,7 @@ export interface Exercicio {
   explicacao: string
   passos: string[]
   gifUrl?: string
+  videoUrl?: string
   origem: 'catalogo' | 'usuario'
 }
 
