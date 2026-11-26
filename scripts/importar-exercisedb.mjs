@@ -10,9 +10,12 @@ const PAUSA_MS = 600
 const MAX_TENTATIVAS = 8
 const SAIDA = new URL('../src/catalogo-exercisedb.json', import.meta.url)
 
+// Normaliza para comparar: minúsculas, sem hífen/pontuação e com espaços simples
+const normalizar = (t) => String(t).toLowerCase().replace(/[-_.,/]/g, ' ').replace(/\s+/g, ' ').trim()
+
 const nomesPrincipais = JSON.parse(
   readFileSync(new URL('./exercicios-principais.json', import.meta.url), 'utf8'),
-).map((n) => n.toLowerCase().trim())
+).map(normalizar)
 const principais = new Set(nomesPrincipais)
 
 const encontrados = new Map()
@@ -56,7 +59,7 @@ while (true) {
   }
 
   for (const ex of json.data ?? []) {
-    const nome = String(ex.name).toLowerCase().trim()
+    const nome = normalizar(ex.name)
     if (principais.has(nome) && !encontrados.has(nome)) {
       encontrados.set(nome, {
         id: `edb-${ex.exerciseId}`,
